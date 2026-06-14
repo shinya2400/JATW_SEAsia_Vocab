@@ -1,0 +1,265 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.article-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+.tab-btn {
+  font-size: 12px; padding: 5px 10px; border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary);
+  color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans);
+}
+.tab-btn:hover { background: var(--color-background-secondary); }
+.tab-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+.art-meta { margin-bottom: 1.25rem; }
+.art-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
+.art-source { font-size: 12px; color: var(--color-text-secondary); }
+.filter-row { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+.filter-btn {
+  font-size: 11px; padding: 3px 10px; border-radius: 999px;
+  border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary);
+  color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans);
+}
+.filter-btn:hover { background: var(--color-background-secondary); }
+.filter-btn.active { border-color: var(--color-border-primary); color: var(--color-text-primary); background: var(--color-background-secondary); font-weight: 500; }
+.terms-grid { display: flex; flex-direction: column; gap: 10px; }
+.term-card {
+  background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg); padding: 13px 15px;
+  border-left: 3px solid transparent;
+}
+.term-card.org { border-left-color: #534AB7; }
+.term-card.place { border-left-color: #0F6E56; }
+.term-card.agreement { border-left-color: #BA7517; }
+.term-card.concept { border-left-color: #D85A30; }
+.term-card.event { border-left-color: #185FA5; }
+.term-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+.term-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.badge {
+  font-size: 10px; padding: 2px 7px; border-radius: 999px; font-weight: 500; white-space: nowrap;
+}
+.badge.org { background: #EEEDFE; color: #3C3489; }
+.badge.place { background: #E1F5EE; color: #085041; }
+.badge.agreement { background: #FAEEDA; color: #633806; }
+.badge.concept { background: #FAECE7; color: #712B13; }
+.badge.event { background: #E6F1FB; color: #0C447C; }
+.term-def { font-size: 13px; color: var(--color-text-secondary); line-height: 1.55; margin-bottom: 8px; }
+.term-quote {
+  font-size: 12px; line-height: 1.6; color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+  border-left: 2px solid var(--color-border-secondary);
+  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+  padding: 7px 10px;
+  font-style: italic;
+}
+.term-quote em { font-style: normal; font-weight: 500; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-text-secondary); }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.no-results { font-size: 13px; color: var(--color-text-secondary); padding: 1rem 0; }
+</style>
+
+<h2 class="sr-only">Key vocabulary from each JATW article with direct quotes showing usage in context</h2>
+
+<div style="padding: 1rem 0;">
+<div class="article-tabs" id="tabs"></div>
+<div class="legend">
+  <span class="legend-item"><span class="legend-dot" style="background:#534AB7"></span>Organization</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#0F6E56"></span>Place</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#BA7517"></span>Agreement/Treaty</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Concept</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Event</span>
+</div>
+<div class="filter-row" id="filters"></div>
+<div class="art-meta"><div class="art-title" id="art-title"></div><div class="art-source" id="art-source"></div></div>
+<div class="terms-grid" id="terms-list"></div>
+</div>
+
+<script>
+const articles = [
+  {
+    id: 0, short: "Pacific Defense Pact", title: "The Case for a Pacific Defense Pact", source: "Ely Ratner · Foreign Affairs · Jul/Aug 2025",
+    terms: [
+      { name: "Pacific Defense Pact", type: "concept", def: "Ratner's proposed formal collective defense alliance among the US, Japan, Australia, and the Philippines.", quote: "Such an alliance—call it the <em>'Pacific Defense Pact'</em>—would bind those countries that are currently most aligned and prepared to take on the China challenge together: Australia, Japan, the Philippines, and the United States." },
+      { name: "Indo-Pacific", type: "place", def: "The combined Indian Ocean–Pacific region, the primary theater of US-China strategic competition.", quote: "Without a robust commitment to collective defense, <em>the Indo-Pacific</em> is on a path to instability and conflict." },
+      { name: "Taiwan", type: "place", def: "Self-governed island whose potential seizure by China is the central contingency driving calls for a formal Asian defense pact.", quote: "CIA Director William Burns revealed in 2023, Chinese President Xi Jinping has instructed his military 'to be ready by 2027 to invade <em>Taiwan</em>.' But as Burns went on to note, China's leaders 'have doubts about whether they could accomplish that invasion.'" },
+      { name: "South China Sea", type: "place", def: "Strategic maritime zone where China asserts sweeping territorial claims overlapping with those of several neighbors.", quote: "In the 2010s, Beijing pursued an unprecedented campaign of land reclamation and built military bases atop reefs and islets that are also claimed by the Philippines and other Southeast Asian states [in the <em>South China Sea</em>]." },
+      { name: "NATO", type: "org", def: "The 32-member transatlantic collective defense alliance; its mutual defense clause serves as the template for proposed Asian equivalents.", quote: "In Europe, U.S. officials embraced collective defense: an attack on one ally would be treated as an attack on all. Such was the logic behind the founding, in 1949, of <em>NATO</em>, the North Atlantic Treaty Organization. In Asia, however, similar aspirations foundered." },
+      { name: "SEATO", type: "org", def: "The Southeast Asia Treaty Organization (1954–1977), a short-lived Cold War alliance often cited as a cautionary tale for pan-Asian collective defense.", quote: "The only seeming exception, the <em>Southeast Asia Treaty Organization</em>, proved the point. Founded in 1954, SEATO was a motley alliance among Australia, France, New Zealand, Pakistan, the Philippines, Thailand, the United Kingdom, and the United States. It suffered from a lack of unity and quietly dissolved in 1977." },
+      { name: "AUKUS", type: "agreement", def: "A trilateral security partnership between Australia, the UK, and the US centered on nuclear-powered submarines.", quote: "The <em>AUKUS</em> partnership brought together Canberra, London, and Washington to help Australia build conventionally armed, nuclear-powered submarines." },
+      { name: "Quad", type: "org", def: "The Quadrilateral Security Dialogue among the US, Japan, Australia, and India, focused on a free and open Indo-Pacific.", quote: "As members of the <em>Indo-Pacific Quad</em>, Australia, India, Japan, and the United States joined efforts to provide maritime domain awareness throughout the region." },
+      { name: "Five Eyes", type: "org", def: "An intelligence-sharing alliance among the US, UK, Canada, Australia, and New Zealand.", quote: "New Zealand would be another prospective partner, especially since it is already part of the <em>Five Eyes</em> intelligence-sharing group alongside Australia, Canada, the United Kingdom, and the United States." },
+      { name: "Hub-and-spokes system", type: "concept", def: "The existing US alliance architecture in Asia — bilateral alliances radiating from Washington, as opposed to a multilateral pact.", quote: "The Biden administration in particular worked to supplement the older <em>'hub-and-spokes'</em> model with what it envisioned as a 'latticework' of relationships in Asia." },
+      { name: "The Squad", type: "org", def: "An informal grouping of Australia, Japan, the Philippines, and the US that conducts joint exercises in the South China Sea.", quote: "Known informally as <em>'the Squad'</em> (to distinguish it from the Quad), the group conducts regular naval, maritime, and air force exercises in the South China Sea." },
+      { name: "'Great rejuvenation of the Chinese nation'", type: "concept", def: "Xi Jinping's stated national vision for restoring China's historical greatness, interpreted as encompassing regional dominance.", quote: "Beijing's geopolitical aspirations for <em>'the great rejuvenation of the Chinese nation'</em> remain unchanged. China seeks to seize Taiwan, control the South China Sea, weaken U.S. alliances, and ultimately dominate the region." },
+      { name: "Deterrence by denial", type: "concept", def: "A defensive strategy that aims to prevent aggression by making military success too costly.", quote: "To sustain those doubts—concerning Taiwan but also other potential targets in the region—should be a top priority of U.S. foreign policy. That requires convincing Beijing that any attack would ultimately come at an <em>unacceptable cost</em>." },
+      { name: "Lowy Institute", type: "org", def: "A leading Australian foreign policy think tank.", quote: "According to the <em>Lowy Institute</em>, a leading Australian think tank, the share of Australians who believed China would become a military threat to their country nearly doubled from 2012 to 2022. It now stands above 70 percent." },
+    ]
+  },
+  {
+    id: 1, short: "Should Asia Make It Official?", title: "Should Asia Make It Official?", source: "Ken Jimbo · Foreign Affairs · Sep/Oct 2025",
+    terms: [
+      { name: "Asian NATO", type: "concept", def: "A proposed NATO-style multilateral collective defense organization for the Indo-Pacific, which Jimbo argues is counterproductive.", quote: "Ratner's central argument—that these countries should codify mutual defense obligations—overlooks crucial realities that make what others have termed an <em>'Asian NATO'</em> counterproductive." },
+      { name: "Core four", type: "concept", def: "Ratner's term for the proposed anchor members: the US, Japan, Australia, and the Philippines.", quote: "No such consensus on the threat posed by China has emerged in the Indo-Pacific, even among Ratner's <em>'core four'</em> countries." },
+      { name: "Mutual defense commitments", type: "concept", def: "Binding obligations among alliance members to treat an attack on one as an attack on all — the core of NATO's Article 5.", quote: "Japan's security strategy prioritizes defense cooperation with like-minded neighbors but not <em>mutual defense commitments</em>." },
+      { name: "Deterrence by denial", type: "concept", def: "Strategy of making military aggression too costly by building strong defensive capabilities in-theater.", quote: "Australia's geographic distance from potential conflict zones in East Asia and shifting defense posture—from <em>expeditionary peacekeeping to deterrence by denial</em> and regional force projection—set it apart from other countries in the region." },
+      { name: "Commitment hazard", type: "concept", def: "The risk that formalizing an alliance creates obligations that an adversary will deliberately test or exploit.", quote: "Elevating these arrangements into a treaty-based mutual defense pact could disrupt an already effective system, create a <em>commitment hazard</em> that China would certainly test, and alienate partners not yet ready—or willing—to formalize security commitments." },
+      { name: "International House of Japan", type: "org", def: "A Tokyo-based institution promoting international dialogue, where Jimbo serves as Managing Director of Programs.", quote: "KEN JIMBO is Managing Director of Programs at the <em>International House of Japan</em>, Professor of International Relations at Keio University, and former Senior Adviser to Japan's National Security Secretariat." },
+      { name: "India / South Korea (holdouts)", type: "place", def: "Key regional powers not yet willing or ready to formalize security commitments, whose exclusion could fracture regional trust.", quote: "Attempting to institutionalize collective defense without the support of these key actors [India and South Korea] could fracture the very trust and coordination Ratner seeks to enhance." },
+    ]
+  },
+  {
+    id: 2, short: "Contingent Capabilities", title: "Contingent Capabilities: Southeast Asia's Emerging Anti-Access Environment", source: "Evan Laksmana · IISS · Feb 2026",
+    terms: [
+      { name: "A2/AD (Anti-Access/Area-Denial)", type: "concept", def: "Strategy and capabilities to prevent or restrict an adversary's ability to enter or operate within a geographic area.", quote: "Southeast Asian states are seeking to develop and implement <em>anti-access/area-denial (A2/AD)</em> strategies and capabilities. The development of A2/AD strategies and capabilities by Indonesia, Malaysia, the Philippines, Singapore and Vietnam is rudimentary thus far and lacks coherent, consistent and systematic planning across the strategic, operational, tactical and technological levels." },
+      { name: "IISS", type: "org", def: "The International Institute for Strategic Studies — a London-based think tank specializing in global security and military affairs.", quote: "Dr Evan A. Laksmana, <em>Shangri-La Dialogue Senior Fellow for Southeast Asian Security and Defence</em>, and Editor, Asia-Pacific Regional Security Assessment [at the IISS]." },
+      { name: "Shangri-La Dialogue", type: "event", def: "An annual Asia-Pacific security summit organized by the IISS in Singapore.", quote: "US and Philippine troops fire a 105mm howitzer during a counter-landing live-fire exercise as part of the <em>Balikatan</em> joint military exercise in Aparri, Cagayan province, the Philippines, May 2025." },
+      { name: "Active Archipelagic Defense Strategy (AADS)", type: "concept", def: "Indonesia/Philippines defense doctrine centered on leveraging island geography to create layered defensive barriers.", quote: "Analysts consider the [Coastal and Archipelagic Defense Concept] to be an extension or evolution of the PN's 2013 <em>Active Archipelagic Defense Strategy (AADS)</em> and the Philippine Marine Corps' 2021 Archipelagic Coastal Defense (ACD) Concept." },
+      { name: "Mutual Defense Treaty (MDT)", type: "agreement", def: "The 1951 bilateral security treaty between the US and the Philippines committing each to defend the other.", quote: "Policymakers and stakeholders appear confident that the <em>Mutual Defense Treaty (MDT)</em> would be honoured by the US if the Philippines were to be attacked." },
+      { name: "Balikatan", type: "event", def: "Annual joint military exercises between US and Philippine forces.", quote: "The DAGIT-PA involved around 3,000 AFP personnel, while the 2024 <em>Balikatan</em> exercise with the US involved more than 16,000 US and AFP personnel." },
+      { name: "Indonesia", type: "place", def: "The world's largest archipelago state developing an archipelagic defense doctrine.", quote: "A2/AD as a military operational term focuses on preventing an opposing force from exploiting certain geographies, or at least raising the military cost and risk of doing so... The concept of A2/AD is appealing given that it applies to states that are relatively militarily weak (of which there are many in Southeast Asia) wishing to defend themselves more effectively against major powers [such as <em>Indonesia</em>]." },
+      { name: "Mine warfare", type: "concept", def: "Naval mines deployed to deny adversary access to key maritime chokepoints — a low-cost A2/AD tool.", quote: "These measures could leverage a range of capabilities, including <em>naval mines</em>, integrated air defences and armed militias or proxies." },
+    ]
+  },
+  {
+    id: 3, short: "ASEAN's ISPs", title: "ASEAN's Institutional Strategic Partnerships in the Indo-Pacific", source: "Kei Koga · Journal of Current Southeast Asian Affairs · 2026",
+    terms: [
+      { name: "ASEAN", type: "org", def: "A 10-member regional bloc founded in 1967 to promote regional peace and economic cooperation.", quote: "The <em>Association of Southeast Asian Nations (ASEAN)</em>, the central actor in East Asian multilateralism since the 1990s, has quietly strengthened its bilateral relationships with major regional powers through the establishment of strategic partnerships, beginning with the ASEAN–China SP in 2003." },
+      { name: "Strategic Partnership (SP)", type: "concept", def: "A formal diplomatic status ASEAN confers on external powers, elevated short of a military alliance.", quote: "The <em>'strategic partnership' (SP)</em> status has gained significant international attention since the end of the Cold War, offering an alternative bilateral framework to traditional alliances and coalitions." },
+      { name: "Comprehensive Strategic Partnership (CSP)", type: "concept", def: "The highest tier of ASEAN's formal external partnerships — though its distinction from an SP is often ambiguous.", quote: "ASEAN has elevated many of its external relations to either SP or <em>comprehensive strategic partnership (CSP)</em> status with key regional players: China, Japan, Australia, the United States, India, New Zealand, Russia, Canada, and the European Union." },
+      { name: "Plans of Action (POAs)", type: "agreement", def: "Official documents that specify concrete cooperative activities for each ASEAN strategic partnership.", quote: "To illustrate this dynamic, the paper analyses official documents, particularly the <em>'Plans of Action (POAs)'</em> associated with each ISP, identifying its specific functionalities and tracing their evolution and effectiveness over time." },
+      { name: "Functional enhancement", type: "concept", def: "One of Koga's four ISP types — partnerships aimed at building new cooperative capacity.", quote: "<em>'Functional enhancement'</em> aims to strengthen tangible, functional cooperation, whereas 'functional maintenance' seeks to ensure and focus on the continuation of existing functional cooperation without generating explicit strategic intention." },
+      { name: "Strategic signalling", type: "concept", def: "One of Koga's ISP types — using SP status to send political messages about alignment preferences.", quote: "<em>'Strategic signalling'</em> does not necessarily guarantee the enhancement or maintenance of tangible cooperation; rather, the conferment of such status serves to signal close relations both internally and externally." },
+      { name: "Norm/rule-making", type: "concept", def: "One of Koga's ISP types — using the SP framework to promote or institutionalize specific norms of behavior.", quote: "<em>'Norm/rule-making'</em> facilitates the development of regional or global norms aligned with those of an institution, thereby collectively contributing to regional and global order-building." },
+      { name: "ASEAN Centrality", type: "concept", def: "The principle that ASEAN should remain the central driver of regional multilateral processes.", quote: "ASEAN and South Korea have reaffirmed ASEAN's institutional norms and rules, including <em>'ASEAN Centrality'</em>, 'Treaty of Amity and Cooperation in Southeast Asia,' and 'ASEAN Outlook on the Indo-Pacific (AOIP),' thereby illustrating their shared acknowledgement of appropriate behaviour grounded in those principles." },
+      { name: "Marginal returns", type: "concept", def: "Koga's warning that as ASEAN grants SP/CSP status to more partners, the strategic value of the designation diminishes.", quote: "As ISP status proliferates, its functional benefits diminish, generating <em>marginal returns</em> and potentially leading to a gradual decline in the overall utility of the ISPs." },
+    ]
+  },
+  {
+    id: 4, short: "Asian NATO vs. Multi-Alignment", title: "Asian NATO Versus Pragmatic Multi-Alignment", source: "Kuik Cheng-Chwee · Asan Institute · Apr 2026",
+    terms: [
+      { name: "Asan Institute for Policy Studies", type: "org", def: "A prominent South Korean think tank focused on security and diplomacy.", quote: "KUIK Cheng-Chwee, Non-Resident Senior Fellow at the <em>Asan Institute for Policy Studies</em>... Professor of International Relations [who] assesses the relative desirability of an 'Asian NATO.'" },
+      { name: "Hub-and-spokes system", type: "concept", def: "The existing US bilateral alliance architecture in Asia — the starting point for debates about an Asian NATO.", quote: "There have been intermittent discussions exploring the feasibility of transforming the U.S.-led <em>'hub-and-spokes' bilateral alliance system</em> into a NATO-like multilateral collective defense organization." },
+      { name: "Pragmatic multi-alignment", type: "concept", def: "Kuik's alternative to an Asian NATO — flexible relationships with multiple great powers simultaneously.", quote: "This Issue Brief assesses the relative desirability of an 'Asian NATO' by contrasting it with a distinct approach, termed <em>'pragmatic multi-alignment'</em>, and presenting them as two competing pathways for middle-power realignment in the Trump 2.0 era." },
+      { name: "Trump 2.0", type: "concept", def: "Donald Trump's second presidency, characterized by unpredictability and transactionalism, prompting allies to reassess reliance on Washington.", quote: "As the United States under <em>Trump 2.0</em> becomes more unpredictable, transactional, and coercive, while China under Xi Jinping displays visible assertiveness—particularly in the maritime and cyber domains, often with unclear intentions—many countries caught between Washington and Beijing are becoming increasingly concerned about both superpowers." },
+      { name: "Hudson Institute", type: "org", def: "A Washington DC-based conservative think tank where Ishiba published his Asian NATO proposal.", quote: "Before Shigeru Ishiba was elected president of the LDP and appointed Prime Minister of Japan in October 2024, he proposed the idea in a commentary published by the <em>Hudson Institute</em>, a Washington, D.C.-based think tank." },
+      { name: "World Economic Forum / Davos", type: "event", def: "Annual gathering in Davos; Canadian PM Carney's Jan 2026 speech there catalyzed the middle power debate.", quote: "The momentum for such middle-power realignment was further amplified by Canadian Prime Minister Mark Carney's rousing speech at the <em>January 2026 World Economic Forum</em>, in which he called on middle powers to assert themselves and act together amid a ruptured world order." },
+      { name: "LDP (Liberal Democratic Party)", type: "org", def: "Japan's dominant ruling party; its president Shigeru Ishiba became PM in October 2024.", quote: "Before Shigeru Ishiba was elected president of the <em>Liberal Democratic Party (LDP)</em> and appointed Prime Minister of Japan in October 2024, he proposed the idea [of an Asian NATO]." },
+      { name: "Middle powers", type: "concept", def: "States that are neither superpowers nor minor powers, now actively recalibrating their foreign policies.", quote: "These countries, particularly next-tier powers and secondary states that are viewed as, or perceive themselves as, <em>'middle powers'</em>, have realigned and stepped up efforts to explore collective or convergent self-help mechanisms, with an eye toward pooling resources, multiplying capabilities, and managing shared challenges." },
+    ]
+  },
+  {
+    id: 5, short: "Japan Not Qualified", title: "Chinese Scholar: Japan Not Qualified to Discuss Defense Cooperation", source: "CGTN · May 2026",
+    terms: [
+      { name: "Shangri-La Dialogue (23rd)", type: "event", def: "The 2026 edition of the annual IISS security summit in Singapore, where PLA Maj. Gen. Meng challenged Japan's legitimacy.", quote: "Major General Meng Xiangqing, head of the People's Liberation Army (PLA) expert delegation... made the remarks during a session of the <em>23rd Shangri-La Dialogue</em>." },
+      { name: "PLA (People's Liberation Army)", type: "org", def: "China's unified military force.", quote: "Major General Meng Xiangqing, head of the <em>People's Liberation Army (PLA)</em> expert delegation and a professor from the PLA National Defense University, made the remarks during a session of the 23rd Shangri-La Dialogue." },
+      { name: "PLA National Defense University", type: "org", def: "China's premier military academic institution, which trains senior PLA officers.", quote: "Major General Meng Xiangqing... a professor from the <em>PLA National Defense University</em>, made the remarks during a session of the 23rd Shangri-La Dialogue." },
+      { name: "Tokyo Trials", type: "event", def: "The post-WWII war crimes tribunal (1946–48) that tried Japanese military and political leaders.", quote: "Meng noted that 2026 marks the 80th anniversary of the opening of the <em>International Military Tribunal for the Far East, also known as the Tokyo Trials</em>. He said the tribunal's verdict permanently condemned the crimes committed by Japanese militarism and laid an important legal foundation for the post-war international order." },
+      { name: "Post-war peace framework", type: "concept", def: "The international order established after WWII, which China argues Japan is undermining through its defense buildup.", quote: "Some forces have even taken concrete steps to break through constraints imposed by the <em>post-war peace framework</em>." },
+      { name: "Militarism", type: "concept", def: "The ideology prioritizing military power and expansion; China accuses Japan of risking its revival.", quote: "'Is a country that has not thoroughly reckoned with the legacy of <em>militarism</em> qualified to speak loudly about defense cooperation on the international stage? Can it win the trust of the international community, especially Asian countries that once suffered from its aggression? I have serious doubts,' he said." },
+      { name: "Singapore", type: "place", def: "Host city of the Shangri-La Dialogue, a neutral venue for Asia-Pacific security discussions.", quote: "The <em>23rd Shangri-La Dialogue opened in Singapore</em> on Friday evening, bringing together more than 550 policymakers, defense officials and experts from over 40 countries and regions." },
+    ]
+  },
+  {
+    id: 6, short: "Middle Power in Asia", title: "Middle Power in Asia (East Asia Forum Quarterly)", source: "Various authors · East Asia Forum · Apr–Jun 2026",
+    terms: [
+      { name: "East Asia Forum Quarterly (EAFQ)", type: "org", def: "An academic policy journal affiliated with the Australian National University.", quote: "As competition among major powers intensifies and the rules-based order is under mounting strain, closer cooperation among middle powers is becoming less a matter of choice than of necessity [argues the editors' introduction to the <em>East Asia Forum Quarterly</em>]." },
+      { name: "CPTPP", type: "agreement", def: "An 11-nation free trade agreement revived by Japan and Australia after the US withdrew in 2017.", quote: "The <em>Comprehensive and Progressive Agreement for Trans-Pacific Partnership</em>, revived by Japan and Australia after the United States withdrew in 2017, is one example [of middle power cooperation that excludes both the US and China]." },
+      { name: "Strait of Hormuz", type: "place", def: "Narrow waterway through which ~20% of global oil transits; its closure has caused severe energy disruptions.", quote: "Recent disruptions to oil and fertiliser supplies linked to the closure of the <em>Strait of Hormuz</em> offer a clear illustration. Turbulence in global energy markets now extends beyond concerns about economic and energy security, with growing implications for food security and defence preparedness." },
+      { name: "Minilateral", type: "concept", def: "Small, flexible groupings of like-minded states cooperating on specific issues, an increasingly prominent feature of Asian security.", quote: "Arrangements that exclude both the United States and China—whether bilateral, multilateral, or <em>minilateral</em>—are an increasing feature of the regional landscape." },
+      { name: "G20", type: "org", def: "The Group of 20 — a forum of the world's major economies that coordinates on global economic and financial issues.", quote: "The cover photo: Delegates arrive at the Cape Town International Convention Centre during the <em>G20 Finance Ministers</em> meeting in Cape Town." },
+      { name: "Strategic autonomy", type: "concept", def: "The capacity of a state to make and implement foreign policy decisions independently of great power dictates.", quote: "For over a decade, middle powers in Asia and the Pacific have been diversifying their external ties and seeking greater <em>strategic autonomy</em>." },
+      { name: "Rules-based international order", type: "concept", def: "The post-WWII framework of international norms, laws, and institutions viewed as under mounting strain.", quote: "As competition among major powers intensifies and the <em>rules-based order</em> is under mounting strain, closer cooperation among middle powers is becoming less a matter of choice than of necessity." },
+    ]
+  },
+  {
+    id: 7, short: "No-Rules Based Order", title: "No-Rules Based Order: The World As It Really Is", source: "Bilahari Kausikan · RUSI · Jun 2026",
+    terms: [
+      { name: "RUSI", type: "org", def: "The Royal United Services Institute — the world's oldest independent defence and security think tank, based in London.", quote: "Published by the <em>Royal United Services Institute</em>: 'A veteran Singaporean diplomat and scholar reflects on today's strategic uncertainties and enduring myths, appealing for calmer and more sober perspectives on the challenges.'" },
+      { name: "Davos / Carney speech", type: "event", def: "Canadian PM Carney's Jan 2026 World Economic Forum speech calling on middle powers to uphold a 'ruptured' world order.", quote: "In January this year, speaking at <em>Davos</em>, Prime Minister Mark Carney of Canada called on middle powers who shared common values to work together to uphold an international order that he argued had 'ruptured' now that America was no longer willing to uphold it." },
+      { name: "Crimea annexation", type: "event", def: "Russia's 2014 seizure of Crimea from Ukraine; Kausikan uses Kerry's reaction to illustrate naive Western assumptions.", quote: "In 2014, then US Secretary of State John Kerry criticised the Russian annexation of <em>Crimea</em> by calling it 19th century behaviour in the 21st century... the underlying assumption was that your adversary ought to share your values. But if your adversary shared your values, it would not be your adversary in the first place." },
+      { name: "Balance of power", type: "concept", def: "A realist concept where peace is maintained by roughly equal distributions of power that deter aggression.", quote: "Rules, however, cannot operate effectively without a foundation of stability and stability requires deterrence and <em>a balance of power</em>. It is patently obvious that middle powers cannot by themselves either deter Russia or balance China." },
+      { name: "Deterrence", type: "concept", def: "The strategy of preventing conflict by convincing an adversary the costs of aggression outweigh any potential gains.", quote: "Strong <em>deterrence</em> makes for stable relationships. Europe allowed its defence capabilities to degrade in the mistaken belief that the jungle had been permanently tamed. Europe is now paying the price of that delusion." },
+      { name: "Bretton Woods system", type: "org", def: "The post-WWII international economic framework establishing the IMF, World Bank, and rules-based trade architecture.", quote: "The post-Second World War international order rested on two pillars. First, a balance of power that ultimately depended on nuclear deterrence. Second, a network of institutions based on the idea of law and rules constructed around the UN and <em>Bretton Woods</em> systems." },
+      { name: "Singapore", type: "place", def: "Home base of Kausikan; Singapore's tradition of frank, realist small-state diplomacy underpins his critique.", quote: "We in <em>Singapore</em> are fond – perhaps a little overly fond – of saying that a world governed in accordance with law is in the interest of small states... But the more salient question is whether we really live in such a world? The honest answer is not all the time and only in certain domains." },
+      { name: "Indonesia (US defense agreement)", type: "place", def: "Case study Kausikan cites to show that interest — not values — drives alliances.", quote: "In April, <em>Indonesia</em>, the world's biggest Muslim country with a long and proud tradition of non-alignment and a 'free and active' foreign policy, concluded a defence cooperation agreement with the US, and did so while the US was fighting a war against Iran, another Muslim country." },
+    ]
+  },
+  {
+    id: 8, short: "Seeking Agency", title: "Seeking Agency in Uncertainty: Asian Middle Powers and the Fragmenting Global Order", source: "Aamer & Chanlett-Avery · Asia Society Policy Institute · Apr 2026",
+    terms: [
+      { name: "Asia Society Policy Institute (ASPI)", type: "org", def: "A Washington DC-based policy institute focused on US-Asia relations.", quote: "With a solution-oriented mandate, the <em>Asia Society Policy Institute</em> tackles major policy challenges confronting the Asia-Pacific in security, prosperity, sustainability, and the development of common norms and values for the region." },
+      { name: "Hedging", type: "concept", def: "A foreign policy strategy of maintaining relationships with competing great powers to avoid forced exclusive alignment.", quote: "Rather than choosing sides, many are <em>hedging</em> to secure national interests: deepening security ties with Washington while sustaining economic engagement with Beijing, expanding mini-lateral frameworks, and strengthening cross-regional linkages that reduce overreliance on any single pole of power." },
+      { name: "Supply chain resilience", type: "concept", def: "Capacity to withstand disruptions to critical supply chains — a major driver of middle power diversification.", quote: "Countries such as Japan and Australia, along with India, have tightened cooperation on <em>supply chain resilience</em> and defense interoperability through mechanisms including the Australia-Japan Reciprocal Access Agreement (RAA)." },
+      { name: "BRICS", type: "org", def: "A grouping (originally Brazil, Russia, India, China, South Africa) now expanded to include Egypt, Ethiopia, Indonesia, Iran, and the UAE.", quote: "An expanded <em>BRICS</em>, now including Egypt, Ethiopia, Indonesia, Iran, and the United Arab Emirates, has drawn increased scrutiny in Washington, especially amid speculation about financial architectures that reduce reliance on the U.S. dollar." },
+      { name: "Quad", type: "org", def: "The Quadrilateral Security Dialogue — the US, Japan, Australia, and India; its durability without US leadership is questioned.", quote: "The <em>Quad</em> was conceived as a flexible instrument to uphold stability in the Indo-Pacific without formal treaty or alliance obligations... it has been stymied so far by the failure to hold a leader-level meeting under President Trump's second administration." },
+      { name: "Gulf states", type: "place", def: "Oil-producing states of the Persian Gulf whose energy exports to Asia have been disrupted by the Iran war.", quote: "Middle powers are testing the waters, looking both inside and outside the region, courting some European powers and the <em>Gulf states</em> for cooperative diplomacy, and leaning into existing groupings." },
+      { name: "Andaman Sea", type: "place", def: "Strategic maritime zone between the Indian Ocean and the Strait of Malacca; site of new trilateral military exercises.", quote: "New trilateral maritime military exercises among India, Indonesia, and Japan were launched in 2026 in the <em>Andaman Sea</em>." },
+      { name: "Entrapment", type: "concept", def: "The risk that a country is dragged into an unwanted conflict because of its alliance obligations.", quote: "Countries increasingly find themselves navigating between two systemic pressures: avoiding <em>entrapment</em> in great power rivalries and safeguarding national autonomy, economic resilience, and security interests." },
+    ]
+  },
+  {
+    id: 9, short: "Fragmented ASEAN", title: "What a Fragmented ASEAN Means for US-China Competition", source: "Raymond Kuo · Chicago Council on Global Affairs · May 2026",
+    terms: [
+      { name: "Chicago Council on Global Affairs", type: "org", def: "A Chicago-based foreign policy think tank producing research on international relations.", quote: "Analysis by Raymond C. Kuo, Vice President of Research for Geostrategy and Diplomacy; Marshall M. Bouton Senior Fellow, Asian Studies [at the <em>Chicago Council on Global Affairs</em>]." },
+      { name: "ASEAN Way", type: "concept", def: "ASEAN's diplomatic culture of consensus, non-interference, and incremental decision-making.", quote: "Southeast Asia has long adopted a 'don't make us choose' approach to China and the United States. But the strategy is predicated on the belief that an <em>'ASEAN Way'</em> can generate enough regional coherence and coordination for members to chart an independent path." },
+      { name: "Consensus rule / veto", type: "concept", def: "ASEAN's requirement that all 10 members agree on any formal group position, giving each an effective veto.", quote: "ASEAN's <em>consensus decision-making rule</em>—which gives every member a veto over group decisions—is meant to manifest common, collaborative goals. In practice, however, agreements have often devolved to the most reluctant nation's position, and outside actors have been able to pressure individual countries to veto proposed policies." },
+      { name: "Code of Conduct (COC) for the South China Sea", type: "agreement", def: "A long-negotiated framework to reduce military tensions among ASEAN members and China in disputed waters.", quote: "For years, China has pushed individual members of the bloc to water down or halt discussions on a <em>Code of Conduct (COC) for the South China Sea</em>, an agreement that could reduce military confrontations over rival territorial claims." },
+      { name: "South China Sea", type: "place", def: "The contested maritime zone at the heart of ASEAN's internal divisions, where Chinese coercion of the Philippines is the main friction point.", quote: "The Chinese Coast Guard has rammed multiple Philippine vessels over the past two years, prompting Manila to expand its coast guard stations and increase training with American troops [in the <em>South China Sea</em>]." },
+      { name: "Zombie institution", type: "concept", def: "An academic term describing a scenario where ASEAN continues to formally exist but loses all meaningful decision-making function.", quote: "Either approach would further weaken ASEAN, leaving it—at best—a <em>'zombie institution'</em> that continues to shamble along while consequential discussions and decisions are produced elsewhere." },
+      { name: "Iran war", type: "event", def: "An ongoing (as of 2026) conflict involving Iran that has closed the Strait of Hormuz, disrupting oil supplies to Asia.", quote: "Oil supplies have fallen dramatically across Asia, which received four-fifths of the Gulf's exports before the <em>Iran war</em> broke out. Some countries have already tapped into their strategic reserves, while nations such as Vietnam and the Philippines are encouraging companies to adopt work-from-home arrangements, flexible schedules, or four-day work weeks to conserve energy." },
+      { name: "Institutional vacuum", type: "concept", def: "A scenario in which ASEAN fails to function effectively, leaving no multilateral institution capable of incentivizing regional cooperation.", quote: "A nonresponse could prompt the Philippines to further expand its security cooperation with the United States and other partners, and push Southeast Asia toward an <em>'institutional vacuum.'</em>" },
+      { name: "Liberation Day tariffs", type: "event", def: "Trump administration tariffs targeting ASEAN members at rates of 44–49%, adding economic pressure on top of geopolitical strains.", quote: "ASEAN members received four of the top six tariff rates imposed during <em>'Liberation Day'</em>, ranging from 44 to 49 percent." },
+      { name: "China's Global Initiatives", type: "concept", def: "Three Chinese-led frameworks (Global Security, Global Development, Global Civilization Initiatives) offering alternative international norms.", quote: "For Southeast Asian nations, China's trio of global initiatives—the <em>Global Security Initiative, the Global Development Initiative, and the Global Civilization Initiative</em>—offer at least a semblance of more stable foreign relations than the United States." },
+    ]
+  }
+];
+
+const allTypes = ["org","place","agreement","concept","event"];
+const typeLabels = { org:"Organization", place:"Place", agreement:"Agreement/Treaty", concept:"Concept", event:"Event" };
+let currentArticle = 0;
+let activeFilters = new Set(allTypes);
+
+function render() {
+  const a = articles[currentArticle];
+  document.getElementById("art-title").textContent = a.title;
+  document.getElementById("art-source").textContent = a.source;
+  const list = document.getElementById("terms-list");
+  list.innerHTML = "";
+  const filtered = a.terms.filter(t => activeFilters.has(t.type));
+  if (!filtered.length) { list.innerHTML = '<p class="no-results">No terms match the selected filter.</p>'; return; }
+  filtered.forEach(t => {
+    const card = document.createElement("div");
+    card.className = `term-card ${t.type}`;
+    card.innerHTML = `<div class="term-header"><span class="term-name">${t.name}</span><span class="badge ${t.type}">${typeLabels[t.type]}</span></div><div class="term-def">${t.def}</div><div class="term-quote">${t.quote}</div>`;
+    list.appendChild(card);
+  });
+}
+
+function buildTabs() {
+  const c = document.getElementById("tabs");
+  articles.forEach((a,i) => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (i===0?" active":"");
+    btn.textContent = a.short;
+    btn.onclick = () => { currentArticle=i; document.querySelectorAll(".tab-btn").forEach((b,j)=>b.classList.toggle("active",j===i)); render(); };
+    c.appendChild(btn);
+  });
+}
+
+function buildFilters() {
+  const c = document.getElementById("filters");
+  allTypes.forEach(type => {
+    const btn = document.createElement("button");
+    btn.className = "filter-btn active";
+    btn.textContent = typeLabels[type];
+    btn.onclick = () => {
+      if (activeFilters.has(type)) { if(activeFilters.size===1) return; activeFilters.delete(type); btn.classList.remove("active"); }
+      else { activeFilters.add(type); btn.classList.add("active"); }
+      render();
+    };
+    c.appendChild(btn);
+  });
+}
+
+buildTabs(); buildFilters(); render();
+</script>
